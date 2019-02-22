@@ -63,7 +63,9 @@
 * Базовая информация по языку Dart: https://www.dartlang.org/guides/language/language-tour
 * Руководства по стилю, документированию, использованию и дизайну: https://www.dartlang.org/guides/language/effective-dart
 * Документация по AngularDart: https://webdev.dartlang.org/angular/guide
+* Галерея Angular компонентов: https://dart-lang.github.io/angular_components/
 * Документация по Flutter: https://flutter.io/docs
+* Каталог виджетов Flutter: https://flutter.io/docs/development/ui/widgets
 * Базовая информация по тестированию: https://www.dartlang.org/guides/testing
 
 ## Структура приложения
