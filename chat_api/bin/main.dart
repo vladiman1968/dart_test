@@ -9,6 +9,7 @@ import 'package:rest_api_server/cors_headers_middleware.dart';
 import 'package:rest_api_server/http_exception_middleware.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:chat_models/chat_models.dart';
 
 main() async {
   final db = mongo.Db('mongodb://localhost:27017/simple_chat');
@@ -17,7 +18,7 @@ main() async {
   final messagesCollection =
       MessagesCollection(mongo.DbCollection(db, 'messages'));
   final usersCollection = UsersCollection(mongo.DbCollection(db, 'users'));
-  final wsChannels = <WebSocketChannel>[];
+  final webSockets = <UserId, List<WebSocketChannel>>{};
   final router = Router();
   router.add(ApiResource(
       chatsResource: ChatsResource(
@@ -25,10 +26,10 @@ main() async {
         messagesResource: MessagesResource(
             chatsCollection: chatsCollection,
             messagesCollection: messagesCollection,
-            wsChannels: wsChannels),
+            webSockets: webSockets),
       ),
       usersResource: UsersResource(usersCollection: usersCollection),
-      wsChannels: wsChannels));
+      webSockets: webSockets));
 
   final server = ApiServer(
       address: InternetAddress.anyIPv4,

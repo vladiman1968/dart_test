@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show HttpException;
 
@@ -7,7 +8,6 @@ import 'package:angular_router/angular_router.dart';
 import 'package:chat_models/chat_models.dart';
 import 'package:chat_web/routes.dart';
 import 'package:chat_web/services.dart';
-import 'package:web_socket_channel/html.dart';
 
 @Component(selector: 'chat', templateUrl: 'chat_component.html', styleUrls: [
   'chat_component.css'
@@ -20,18 +20,28 @@ import 'package:web_socket_channel/html.dart';
   DatePipe
 ], providers: [
   materialProviders,
+  ClassProvider(WebChatsClient),
   ClassProvider(WebMessagesClient)
 ])
 class ChatComponent implements OnActivate, OnDeactivate {
+  WebChatsClient chatsClient;
   WebMessagesClient messagesClient;
+  Api api;
   Router router;
   Session session;
   ChatId chatId;
-  HtmlWebSocketChannel webSocketChannel;
+  Chat chat;
+  String chatMembers;
+  StreamSubscription subscription;
   List<Message> messages;
   String newMessageText = '';
 
-  ChatComponent(this.messagesClient, this.router, this.session);
+  ChatComponent(this.chatsClient, this.messagesClient, this.api, this.router, this.session);
+
+  String messageClassName(String messageAuthorName) {
+    if (messageAuthorName != session.currentUser.name) return 'message-right';
+    return 'message-left';
+  }
 
   send() async {
     final newMessage = Message(
@@ -57,19 +67,21 @@ class ChatComponent implements OnActivate, OnDeactivate {
   @override
   onActivate(_, RouterState current) async {
     chatId = ChatId(current.parameters['chatId']);
+    chat = await chatsClient.read(chatId);
+    chatMembers = chat.members.map((user) => user.name).join(', ');
     messages = await messagesClient.read(chatId);
-    webSocketChannel = HtmlWebSocketChannel.connect('ws://localhost:3333/ws');
-    webSocketChannel.stream.listen((data) {
-      final recievedMessage = Message.fromJson(json.decode(data));
-      if (recievedMessage.chat == chatId &&
-          recievedMessage.author.id != session.currentUser.id) {
-        messages.add(recievedMessage);
-      }
+
+    subscription = api.newMessageData.listen((data) {
+      final receivedMessage = Message.fromJson(json.decode(data));
+      receivedMessage.chat != chatId ?
+        api.sendNotification(chat.title, receivedMessage.text)
+      :
+        messages.add(receivedMessage);
     });
   }
 
   @override
   onDeactivate(RouterState current, _) {
-    webSocketChannel.sink.close();
+    subscription.cancel();
   }
 }

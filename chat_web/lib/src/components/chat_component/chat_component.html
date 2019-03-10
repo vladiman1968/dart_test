@@ -2,13 +2,19 @@
   <material-icon icon="keyboard_arrow_left"></material-icon>
   Return to chat list
 </material-button>
+<div *ngIf="chat != null" class="chat">
+  <h3>{{ chat.title }}</h3>
+  <p>{{ chatMembers }}</p>
+</div>
 <material-list>
   <material-list-item *ngFor="let message of messages">
-    <div class="message-head">
-      <span class="message-author">{{ message.author.name }}</span>
-      <span class="message-datetime"> {{ message.createdAt | date:"short"}}</span>
+    <div [class]="messageClassName(message.author.name)">
+        <div class="message-head">
+            <span class="message-author">{{ message.author.name }}</span>
+            <span class="message-datetime"> {{ message.createdAt | date:"short"}}</span>
+        </div>
+        <div class="message-text">{{ message.text }}</div>
     </div>
-    <div class="message-text">{{ message.text }}</div>
   </material-list-item>
 </material-list>
 <material-input
@@ -16,4 +22,9 @@
     [(ngModel)]="newMessageText"
 >
 </material-input>
-<material-button  (trigger)="send()">Send</material-button>
+<material-button
+    [disabled]="newMessageText.trim() == ''"
+    (trigger)="send()"
+>
+    Send
+</material-button>

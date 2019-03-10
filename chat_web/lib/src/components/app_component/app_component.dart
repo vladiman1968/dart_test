@@ -17,13 +17,19 @@ import 'package:chat_web/services.dart';
       MaterialIconComponent,
       routerDirectives
     ],
-    providers: [ClassProvider(WebApiClient), ClassProvider(Session)],
+    providers: [
+      ClassProvider(WebApiClient),
+      ClassProvider(Api),
+      ClassProvider(Session)
+    ],
     exports: [RoutePaths, Routes])
 class AppComponent {
+  Api api;
   Session session;
-  AppComponent(this.session);
+  AppComponent(this.api, this.session);
 
   signOut() {
     session.clear();
+    api.closeWebSocket();
   }
 }

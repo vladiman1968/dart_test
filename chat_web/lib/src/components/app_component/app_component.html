@@ -1,9 +1,14 @@
-<header class="material-header">
+<header class="material-header shadow">
   <div class="material-header-row">
     <material-button icon class="material-drawer-button">
       <material-icon icon="menu"></material-icon>
     </material-button>
-    <span class="material-header-title">Simple Chat {{ session.currentUser?.name }}</span>
+    <span *ngIf="session.currentUser == null" class="material-header-title">
+      Simple Chat
+    </span>
+    <span *ngIf="session.currentUser != null" class="material-header-title">
+      {{ session.currentUser?.name }}
+    </span>
     <div class="material-spacer"></div>
     <nav *ngIf="session.currentUser == null" class="material-navigation">
       <a [routerLink]="RoutePaths.signIn.toUrl()">Sign In</a>

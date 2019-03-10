@@ -1,3 +1,4 @@
+export 'src/services/api.dart';
 export 'src/services/session.dart';
 export 'src/services/web_api_client.dart';
 export 'src/services/web_chats_client.dart';

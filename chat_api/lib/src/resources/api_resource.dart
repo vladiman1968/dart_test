@@ -1,7 +1,9 @@
+import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:rest_api_server/annotations.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:chat_models/chat_models.dart';
 
 import 'chats_resource.dart';
 import 'users_resource.dart';
@@ -10,19 +12,22 @@ import 'users_resource.dart';
 class ApiResource {
   final ChatsResource _chatsResource;
   final UsersResource _usersResource;
-  final List<WebSocketChannel> _wsChannels;
+  final Map<UserId, List<WebSocketChannel>> _webSockets;
+  UserId userId;
   shelf.Handler _wsConnectionHandler;
 
   ApiResource(
       {ChatsResource chatsResource,
       UsersResource usersResource,
-      List<WebSocketChannel> wsChannels})
+        Map<UserId, List<WebSocketChannel>> webSockets})
       : _chatsResource = chatsResource,
         _usersResource = usersResource,
-        _wsChannels = wsChannels {
-    _wsConnectionHandler = webSocketHandler((WebSocketChannel wsChannel) {
-      _wsChannels.add(wsChannel);
-    });
+        _webSockets = webSockets {
+          _wsConnectionHandler = webSocketHandler((WebSocketChannel wsChannel) {
+            if (!(_webSockets.containsKey(userId)))
+              _webSockets[userId] = <WebSocketChannel>[];
+            _webSockets[userId].add(wsChannel);
+        });
   }
 
   /// Chats resource
@@ -36,6 +41,9 @@ class ApiResource {
   /// Handles web-socket connection request
   @Get(path: 'ws')
   shelf.Response handleUpgradeRequest(shelf.Request request, Map context) {
+    userId = UserId(verifyJwtHS256Signature(
+        request.requestedUri.queryParameters['token'], 'secret key')
+        .subject);
     return _wsConnectionHandler(request);
   }
 }

@@ -1,0 +1,31 @@
+.chat {
+  color: #5f7f9f;
+  padding-left: 8px;
+}
+.message-author {
+  font-weight: bold;
+}
+.message-datetime {
+  color: #7f7f7f;
+}
+.message-head {
+  background: #9fbfdf;
+  border: 1px solid white;
+  border-radius: 10px 10px 0 0;
+  padding: 8px;
+  width: 80%;
+}
+.message-left {
+  margin-right: 50%;
+}
+.message-right {
+  margin-left: 50%;
+}
+.message-text {
+  background: #bfdfff;
+  border: 1px solid white;
+  border-radius: 0 0 10px 10px;
+  margin-bottom: 16px;
+  padding: 8px;
+  width: 80%;
+}

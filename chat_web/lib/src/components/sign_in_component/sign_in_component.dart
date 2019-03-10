@@ -27,15 +27,17 @@ class SignInComponent {
   String username = '';
   String password = '';
   WebUsersClient usersClient;
+  Api api;
   Router router;
   Session session;
 
-  SignInComponent(this.usersClient, this.router, this.session);
+  SignInComponent(this.usersClient, this.api, this.router, this.session);
 
   signIn() async {
     try {
       var user = await usersClient.login(username, password);
       session.currentUser = user;
+      api.addWebSocket();
       router.navigate(RoutePaths.chats.toUrl());
     } on HttpException catch (e) {
       print('Login failed');

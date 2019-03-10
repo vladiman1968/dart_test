@@ -25,6 +25,15 @@ class ChatsResource {
     return chatsCollection.find(query).toList();
   }
 
+  /// Reads chat object from database
+  @Get(path: '{chatIdStr}')
+  Future<Chat> readChat(String chatIdStr, Map context) async {
+    final currentUser = User.fromJson(context['payload']);
+    if (currentUser == null) throw (ForbiddenException());
+    final chatId = ChatId(chatIdStr);
+    return await chatsCollection.findOne(chatId);
+  }
+
   /// Creates new chat in database
   @Post()
   Future<Chat> create(Map requestBody, Map context) async {

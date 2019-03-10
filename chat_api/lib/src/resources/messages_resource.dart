@@ -13,10 +13,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class MessagesResource {
   MessagesCollection messagesCollection;
   ChatsCollection chatsCollection;
-  List<WebSocketChannel> wsChannels;
+  //List<WebSocketChannel> wsChannels;
+  Map<UserId, List<WebSocketChannel>> webSockets;
 
   MessagesResource(
-      {this.chatsCollection, this.messagesCollection, this.wsChannels});
+      //{this.chatsCollection, this.messagesCollection, this.wsChannels});
+      {this.chatsCollection, this.messagesCollection, this.webSockets});
 
   /// Creates new message in database
   @Post()
@@ -29,9 +31,15 @@ class MessagesResource {
     if (newMessage.chat != ChatId(chatIdStr))
       throw (BadRequestException({}, 'Wrong chat'));
     final createdMessage = await messagesCollection.insert(newMessage);
-    wsChannels.forEach((wsChannel) {
-      wsChannel.sink
-          .add(json.encode(createdMessage.json, toEncodable: toEncodable));
+    Chat chat = await chatsCollection.findOne(createdMessage.chat);
+    chat.members.forEach((user) {
+      UserId userId = user.id;
+      if ((userId != currentUser.id) && (webSockets.containsKey(userId))) {
+        webSockets[userId].forEach((wsChannel) {
+          wsChannel.sink
+              .add(json.encode(createdMessage.json, toEncodable: toEncodable));
+        });
+      }
     });
     return createdMessage;
   }
